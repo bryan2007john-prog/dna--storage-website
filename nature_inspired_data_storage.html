@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nature-Inspired Data Storage Systems (DNA Storage)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bioBg: '#0b0f19',
+                        bioCard: '#131c2e',
+                        bioNav: '#0a0d17',
+                        cyanAccent: '#00ffcc',
+                        emeraldAccent: '#10b981',
+                        baseA: '#00e5ff', // Cyan
+                        baseT: '#f97316', // Orange/Red
+                        baseC: '#10b981', // Green
+                        baseG: '#a855f7'  // Purple
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Courier New', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ffcc;
+        }
+        
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.25);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+        }
+        
+        /* Nucleotide base animations */
+        .dna-base-node {
+            transition: all 0.2s ease-in-out;
+        }
+        .dna-base-node:hover {
+            transform: scale(1.15) translateY(-2px);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-bioBg text-slate-100 font-sans min-h-screen flex flex-col selection:bg-cyanAccent selection:text-bioBg">
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 bg-bioNav/90 backdrop-blur-md border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-tr from-cyanAccent/20 to-emeraldAccent/20 border border-cyanAccent/40 rounded-lg text-cyanAccent">
+                    <i data-lucide="dna" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-wider bg-gradient-to-r from-cyanAccent to-emeraldAccent bg-clip-text text-transparent">BIO-STORAGE</span>
+                    <span class="text-xs text-slate-400 block -mt-1 font-mono">DNA DATA ENGINE v2.5</span>
+                </div>
+            </div>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex space-x-1 lg:space-x-2 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-2 rounded-md hover:text-cyanAccent hover:bg-slate-800/50 transition">Overview</button>
+                <button onclick="scrollToSection('encoder')" class="px-3 py-2 rounded-md hover:text-cyanAccent hover:bg-slate-800/50 transition">Encoder/Decoder</button>
+                <button onclick="scrollToSection('calculator')" class="px-3 py-2 rounded-md hover:text-cyanAccent hover:bg-slate-800/50 transition">Density Calculator</button>
+                <button onclick="scrollToSection('timeline')" class="px-3 py-2 rounded-md hover:text-cyanAccent hover:bg-slate-800/50 transition">Timeline</button>
+                <button onclick="scrollToSection('matrix')" class="px-3 py-2 rounded-md hover:text-cyanAccent hover:bg-slate-800/50 transition">Comparison Matrix</button>
+            </nav>
+
+            <!-- Credits Quick Badge -->
+            <div class="hidden lg:flex items-center text-xs font-mono text-slate-400 bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-800">
+                <span class="text-cyanAccent mr-1">Authors:</span> Bryan John (D289) & Krishna Kulkarni (D287)
+            </div>
+
+            <!-- Mobile menu button -->
+            <button id="mobileMenuBtn" class="md:hidden p-2 text-slate-400 hover:text-white">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-bioCard border-b border-slate-800 px-4 pt-2 pb-4 space-y-2">
+            <button onclick="scrollToSection('overview'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800 hover:text-cyanAccent">Overview</button>
+            <button onclick="scrollToSection('encoder'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800 hover:text-cyanAccent">Encoder & Decoder</button>
+            <button onclick="scrollToSection('calculator'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800 hover:text-cyanAccent">Density Calculator</button>
+            <button onclick="scrollToSection('timeline'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800 hover:text-cyanAccent">Research Timeline</button>
+            <button onclick="scrollToSection('matrix'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800 hover:text-cyanAccent">Comparison Matrix</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+
+        <!-- HERO & OVERVIEW SECTION -->
+        <section id="overview" class="relative overflow-hidden rounded-2xl bg-gradient-to-b from-bioCard via-bioCard/80 to-bioBg border border-slate-800/80 p-6 md:p-10">
+            <div class="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-cyanAccent/5 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 -mb-12 -ml-12 w-96 h-96 bg-emeraldAccent/5 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyanAccent/10 border border-cyanAccent/30 text-cyanAccent text-xs font-mono uppercase tracking-wider">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        <span>Nature-Inspired Computing & Storage</span>
+                    </div>
+
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                        Synthetic <span class="bg-gradient-to-r from-cyanAccent via-emeraldAccent to-teal-400 bg-clip-text text-transparent">DNA Data Storage</span> Architecture
+                    </h1>
+
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+                        With global digital data projected to exceed <strong class="text-cyanAccent">384.6 Zettabytes by 2028</strong>, traditional silicon-based storage is approaching physical limits. Molecular DNA provides an ultra-dense, durable, zero-electricity storage alternative engineered by billions of years of biological evolution.
+                    </p>
+
+                    <!-- Key Metrics Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
+                        <div class="bg-bioBg/80 p-4 rounded-xl border border-slate-800">
+                            <div class="text-2xl sm:text-3xl font-extrabold text-cyanAccent font-mono">215 PB</div>
+                            <div class="text-xs text-slate-400 font-medium mt-1">Per Gram of DNA</div>
+                        </div>
+                        <div class="bg-bioBg/80 p-4 rounded-xl border border-slate-800">
+                            <div class="text-2xl sm:text-3xl font-extrabold text-emeraldAccent font-mono">1,000+</div>
+                            <div class="text-xs text-slate-400 font-medium mt-1">Years Shelf-Life</div>
+                        </div>
+                        <div class="col-span-2 sm:col-span-1 bg-bioBg/80 p-4 rounded-xl border border-slate-800">
+                            <div class="text-2xl sm:text-3xl font-extrabold text-teal-300 font-mono">0 Watts</div>
+                            <div class="text-xs text-slate-400 font-medium mt-1">Passive Energy Cost</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive DNA Mapping Diagram -->
+                <div class="lg:col-span-5 bg-bioBg/90 border border-slate-800 p-6 rounded-xl space-y-4 glow-cyan">
+                    <h3 class="text-sm font-mono text-cyanAccent uppercase tracking-widest flex items-center justify-between">
+                        <span>2-Bit Binary Encoding Scheme</span>
+                        <i data-lucide="binary" class="w-4 h-4"></i>
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 font-mono text-sm">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-bioCard border border-cyanAccent/30">
+                            <span class="text-slate-400">Binary <strong class="text-white">00</strong></span>
+                            <span class="px-3 py-1 rounded font-bold bg-cyan-950 text-baseA border border-baseA/50">Adenine (A)</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-bioCard border border-orange-500/30">
+                            <span class="text-slate-400">Binary <strong class="text-white">01</strong></span>
+                            <span class="px-3 py-1 rounded font-bold bg-orange-950 text-baseT border border-baseT/50">Thymine (T)</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-bioCard border border-emerald-500/30">
+                            <span class="text-slate-400">Binary <strong class="text-white">10</strong></span>
+                            <span class="px-3 py-1 rounded font-bold bg-emerald-950 text-baseC border border-baseC/50">Cytosine (C)</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-bioCard border border-purple-500/30">
+                            <span class="text-slate-400">Binary <strong class="text-white">11</strong></span>
+                            <span class="px-3 py-1 rounded font-bold bg-purple-950 text-baseG border border-baseG/50">Guanine (G)</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 italic">
+                        Digital bytes (8-bit) are segmented into 4 two-bit tuples. Each tuple synthesizes into a physical nucleotide base on a single DNA strand.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: LIVE DNA ENCODER & DECODER TOOL -->
+        <section id="encoder" class="space-y-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800 pb-4">
+                <div>
+                    <div class="text-cyanAccent font-mono text-xs uppercase tracking-widest">Interactive Laboratory</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="cpu" class="text-cyanAccent"></i> Text & File Synthetic DNA Converter
+                    </h2>
+                </div>
+                <div class="text-xs text-slate-400 font-mono">
+                    Real-time Binary ↔ Nucleotide Synthesis Engine
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Control Panel / Inputs -->
+                <div class="lg:col-span-5 bg-bioCard p-6 rounded-xl border border-slate-800 space-y-5">
+                    
+                    <!-- Mode Selector Switch -->
+                    <div class="flex p-1 bg-bioBg rounded-lg border border-slate-800 text-xs font-mono">
+                        <button id="modeEncodeBtn" onclick="setAppMode('encode')" class="flex-1 py-2 rounded-md font-bold text-bioBg bg-cyanAccent transition">Encode Text → DNA</button>
+                        <button id="modeDecodeBtn" onclick="setAppMode('decode')" class="flex-1 py-2 rounded-md font-bold text-slate-400 hover:text-white transition">Decode DNA → Text</button>
+                    </div>
+
+                    <!-- Input Form -->
+                    <div id="encodeInputGroup" class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label for="textInput" class="text-sm font-medium text-slate-200">Input Data Text:</label>
+                            <span id="charCount" class="text-xs font-mono text-slate-400">0 characters</span>
+                        </div>
+                        <textarea id="textInput" rows="4" class="w-full bg-bioBg border border-slate-700 rounded-lg p-3 text-slate-100 font-mono text-sm focus:border-cyanAccent focus:ring-1 focus:ring-cyanAccent outline-none transition" placeholder="Type text to synthesize into DNA strand (e.g. Hello World)...">DNA Storage 2026</textarea>
+
+                        <!-- File Upload Option -->
+                        <div class="border border-dashed border-slate-700 hover:border-cyanAccent/50 rounded-lg p-3 text-center cursor-pointer bg-bioBg/50 transition relative">
+                            <input type="file" id="fileInput" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleFileUpload(event)">
+                            <div class="flex items-center justify-center space-x-2 text-xs text-slate-400">
+                                <i data-lucide="upload-cloud" class="w-4 h-4 text-cyanAccent"></i>
+                                <span id="fileNameDisplay">Upload small file or sample text</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="decodeInputGroup" class="space-y-3 hidden">
+                        <label for="dnaInput" class="text-sm font-medium text-slate-200">Input DNA Sequence Strand (A, T, C, G):</label>
+                        <textarea id="dnaInput" rows="4" class="w-full bg-bioBg border border-slate-700 rounded-lg p-3 text-slate-100 font-mono text-sm focus:border-cyanAccent focus:ring-1 focus:ring-cyanAccent outline-none transition uppercase" placeholder="ATCGATCG..."></textarea>
+                    </div>
+
+                    <!-- Mutation / Error Simulator Controls -->
+                    <div class="pt-4 border-t border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-mono text-slate-300 flex items-center gap-2">
+                                <i data-lucide="zap-off" class="w-4 h-4 text-orange-400"></i>
+                                Sequence Error / Mutation Simulation
+                            </label>
+                            <input type="checkbox" id="mutationToggle" class="w-4 h-4 accent-cyanAccent cursor-pointer" onchange="processConverter()">
+                        </div>
+                        <div id="mutationRateContainer" class="space-y-1 opacity-50 pointer-events-none transition-all">
+                            <div class="flex justify-between text-xs font-mono text-slate-400">
+                                <span>Noise Rate:</span>
+                                <span id="mutationRateVal">5%</span>
+                            </div>
+                            <input type="range" id="mutationRate" min="1" max="25" value="5" class="w-full accent-cyanAccent cursor-pointer" oninput="updateMutationRateLabel(); processConverter();">
+                        </div>
+                    </div>
+
+                    <button onclick="processConverter()" class="w-full py-3 bg-gradient-to-r from-cyanAccent to-emeraldAccent text-bioBg font-bold rounded-lg shadow-lg hover:opacity-95 transition flex items-center justify-center space-x-2">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        <span id="convertBtnText">Synthesize DNA Strand</span>
+                    </button>
+                </div>
+
+                <!-- Visualization & Outputs -->
+                <div class="lg:col-span-7 bg-bioCard p-6 rounded-xl border border-slate-800 space-y-6 flex flex-col justify-between">
+                    
+                    <!-- Binary & Sequence Stats -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono text-xs">
+                        <div class="bg-bioBg p-3 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 block">Total Nucleotides:</span>
+                            <span id="statBaseCount" class="text-lg font-bold text-cyanAccent">0</span>
+                        </div>
+                        <div class="bg-bioBg p-3 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 block">Binary Bits:</span>
+                            <span id="statBitsCount" class="text-lg font-bold text-emeraldAccent">0 bits</span>
+                        </div>
+                        <div class="col-span-2 sm:col-span-1 bg-bioBg p-3 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 block">GC-Content Ratio:</span>
+                            <span id="statGcRatio" class="text-lg font-bold text-purple-400">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive DNA Strand Visualizer -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+                            <span class="flex items-center gap-1"><i data-lucide="eye" class="w-3.5 h-3.5 text-cyanAccent"></i> 5' to 3' Interactive Nucleotide Strand Visualizer</span>
+                            <span id="visualCountLabel">0 Bases</span>
+                        </div>
+                        
+                        <!-- Visual Base Strand Render -->
+                        <div id="dnaStrandContainer" class="bg-bioBg border border-slate-800 p-4 rounded-lg min-h-[100px] max-h-[160px] overflow-y-auto flex flex-wrap gap-1.5 items-center">
+                            <!-- Rendered nucleotides will appear here -->
+                        </div>
+
+                        <!-- Color Legend -->
+                        <div class="flex flex-wrap items-center justify-center gap-4 pt-1 text-xs font-mono text-slate-400">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-baseA"></span> A (00)</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-baseT"></span> T (01)</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-baseC"></span> C (10)</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-baseG"></span> G (11)</span>
+                            <span id="mutationLegend" class="hidden flex items-center gap-1 text-red-400"><span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span> Mutated Base</span>
+                        </div>
+                    </div>
+
+                    <!-- Raw Data Outputs (Binary & Sequence / Decoded Text) -->
+                    <div class="space-y-3 pt-2">
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-mono text-slate-400 mb-1">
+                                <span>Binary Bit Stream (0s & 1s):</span>
+                                <button onclick="copyToClipboard('binaryOutput')" class="hover:text-cyanAccent transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                            <div id="binaryOutput" class="bg-bioBg p-2.5 rounded-md font-mono text-xs text-slate-300 break-all max-h-16 overflow-y-auto border border-slate-800">00000000</div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-mono text-slate-400 mb-1">
+                                <span id="outputBoxLabel">Decoded / Synthesized Output:</span>
+                                <button onclick="copyToClipboard('finalOutput')" class="hover:text-cyanAccent transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                            <div id="finalOutput" class="bg-bioBg p-3 rounded-md font-mono text-sm text-cyanAccent break-all max-h-24 overflow-y-auto border border-slate-800 font-bold">
+                                -
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: INTERACTIVE DATA DENSITY & STORAGE CALCULATOR -->
+        <section id="calculator" class="bg-bioCard rounded-2xl border border-slate-800 p-6 md:p-8 space-y-8">
+            <div class="border-b border-slate-800 pb-4">
+                <div class="text-emeraldAccent font-mono text-xs uppercase tracking-widest">Theoretical & Physical Analytics</div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+                    <i data-lucide="calculator" class="text-emeraldAccent"></i> Data Density & Physical Footprint Calculator
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Controls -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="space-y-2">
+                        <label for="dataSizeInput" class="block text-sm font-medium text-slate-200">Target Digital Dataset Size:</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="dataSizeInput" value="100" min="1" max="99999999" class="flex-1 bg-bioBg border border-slate-700 rounded-lg px-4 py-2 text-white font-mono text-lg focus:border-emeraldAccent outline-none" oninput="calculateDensity()">
+                            <select id="dataUnitSelect" class="bg-bioBg border border-slate-700 rounded-lg px-3 py-2 text-emeraldAccent font-mono font-bold focus:border-emeraldAccent outline-none" onchange="calculateDensity()">
+                                <option value="GB">Gigabytes (GB)</option>
+                                <option value="TB" selected>Terabytes (TB)</option>
+                                <option value="PB">Petabytes (PB)</option>
+                                <option value="EB">Exabytes (EB)</option>
+                                <option value="ZB">Zettabytes (ZB)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Preset Buttons -->
+                    <div class="space-y-2">
+                        <span class="text-xs font-mono text-slate-400 block">Quick Benchmark Scale Presets:</span>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="setPreset(1, 'TB')" class="px-2.5 py-1 text-xs font-mono bg-bioBg border border-slate-800 hover:border-emeraldAccent rounded text-slate-300">1 TB (HDD)</button>
+                            <button onclick="setPreset(100, 'PB')" class="px-2.5 py-1 text-xs font-mono bg-bioBg border border-slate-800 hover:border-emeraldAccent rounded text-slate-300">100 PB (Hyperscale)</button>
+                            <button onclick="setPreset(175, 'ZB')" class="px-2.5 py-1 text-xs font-mono bg-bioBg border border-slate-800 hover:border-emeraldAccent rounded text-slate-300">175 ZB (Global 2025 Data)</button>
+                            <button onclick="setPreset(384.6, 'ZB')" class="px-2.5 py-1 text-xs font-mono bg-bioBg border border-slate-800 hover:border-emeraldAccent rounded text-slate-300">384.6 ZB (Target 2028)</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-bioBg p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+                        <div class="text-slate-400">Benchmark Reference:</div>
+                        <div class="text-emeraldAccent font-bold">1 Gram Synthetic DNA ≈ 215 Petabytes (215,000 TB)</div>
+                        <p class="text-slate-400 text-[11px] leading-relaxed">
+                            Based on Erlich & Zielinski's DNA Fountain benchmark architecture.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Output Visual Cards -->
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+                    <!-- DNA Physical Weight Card -->
+                    <div class="bg-bioBg border border-emeraldAccent/30 p-5 rounded-xl glow-emerald space-y-3">
+                        <div class="flex items-center justify-between text-emeraldAccent">
+                            <span class="text-xs font-mono uppercase tracking-wider">DNA Storage Weight</span>
+                            <i data-lucide="scale" class="w-5 h-5"></i>
+                        </div>
+                        <div id="calcDnaWeight" class="text-3xl font-extrabold text-white font-mono">
+                            0.465 mg
+                        </div>
+                        <p id="calcWeightAnalogy" class="text-xs text-slate-400 leading-relaxed">
+                            Equivalent to a fraction of a single grain of salt.
+                        </p>
+                    </div>
+
+                    <!-- Hard Drive Equivalent Card -->
+                    <div class="bg-bioBg border border-slate-800 p-5 rounded-xl space-y-3">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="text-xs font-mono uppercase tracking-wider">Traditional 10TB HDDs</span>
+                            <i data-lucide="hard-drive" class="w-5 h-5"></i>
+                        </div>
+                        <div id="calcHddCount" class="text-3xl font-extrabold text-cyanAccent font-mono">
+                            10 Drives
+                        </div>
+                        <p id="calcHddWeight" class="text-xs text-slate-400 leading-relaxed">
+                            Weighs approx. 7.0 kg of hardware equipment.
+                        </p>
+                    </div>
+
+                    <!-- Visual Physical Footprint Analogy Box -->
+                    <div class="sm:col-span-2 bg-gradient-to-r from-bioBg to-slate-900 border border-slate-800 p-5 rounded-xl space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono text-cyanAccent uppercase">Physical Space Savings Visual Comparison</span>
+                            <i data-lucide="box" class="w-4 h-4 text-slate-400"></i>
+                        </div>
+                        <div id="calcAnalogyBox" class="text-sm text-slate-200 leading-relaxed">
+                            Calculating comparison...
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: RESEARCH TIMELINE & MILESTONES -->
+        <section id="timeline" class="space-y-6">
+            <div class="border-b border-slate-800 pb-4">
+                <div class="text-cyanAccent font-mono text-xs uppercase tracking-widest">Historical Evolution</div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+                    <i data-lucide="history" class="text-cyanAccent"></i> Timeline of DNA Storage Research & Breakthroughs
+                </h2>
+            </div>
+
+            <!-- Timeline Vertical Grid -->
+            <div class="relative border-l-2 border-slate-800 ml-4 md:ml-32 space-y-8 my-6">
+
+                <!-- 2012 Milestone -->
+                <div class="relative pl-6 md:pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-bioBg border-2 border-cyanAccent group-hover:scale-125 transition"></div>
+                    <div class="hidden md:block absolute -left-28 top-1 text-sm font-mono font-bold text-cyanAccent">2012</div>
+                    <div class="bg-bioCard border border-slate-800 p-5 rounded-xl hover:border-cyanAccent/40 transition">
+                        <div class="md:hidden text-xs font-mono font-bold text-cyanAccent mb-1">YEAR 2012</div>
+                        <h3 class="text-lg font-bold text-white">First Next-Gen DNA Data Encoding</h3>
+                        <p class="text-xs text-slate-400 font-mono mb-2">Lead Researcher: Prof. George Church (Harvard University)</p>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Encoded a 53,000-word book, 11 JPG images, and a JavaScript program (700 KB total data) into DNA microchips, proving synthetic DNA as a viable storage medium.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2017 Milestone -->
+                <div class="relative pl-6 md:pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-bioBg border-2 border-emeraldAccent group-hover:scale-125 transition"></div>
+                    <div class="hidden md:block absolute -left-28 top-1 text-sm font-mono font-bold text-emeraldAccent">2017</div>
+                    <div class="bg-bioCard border border-slate-800 p-5 rounded-xl hover:border-emeraldAccent/40 transition">
+                        <div class="md:hidden text-xs font-mono font-bold text-emeraldAccent mb-1">YEAR 2017</div>
+                        <h3 class="text-lg font-bold text-white">DNA Fountain & 215 PB/g Benchmark</h3>
+                        <p class="text-xs text-slate-400 font-mono mb-2">Columbia University & New York Genome Center</p>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Published the "DNA Fountain" mathematical strategy in *Science*, reaching theoretical density of 215 Petabytes per gram with robust error correction for flawless retrieval.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2019 Milestone -->
+                <div class="relative pl-6 md:pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-bioBg border-2 border-teal-400 group-hover:scale-125 transition"></div>
+                    <div class="hidden md:block absolute -left-28 top-1 text-sm font-mono font-bold text-teal-400">2019</div>
+                    <div class="bg-bioCard border border-slate-800 p-5 rounded-xl hover:border-teal-400/40 transition">
+                        <div class="md:hidden text-xs font-mono font-bold text-teal-400 mb-1">YEAR 2019</div>
+                        <h3 class="text-lg font-bold text-white">Fully Automated DNA Data Storage End-to-End</h3>
+                        <p class="text-xs text-slate-400 font-mono mb-2">Microsoft Research & University of Washington</p>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Demonstrated the world's first fully automated system to encode, synthesize, preserve, and decode digital data (storing and playing back HD media files including the film *Arrival*).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2024 Milestone -->
+                <div class="relative pl-6 md:pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-bioBg border-2 border-purple-400 group-hover:scale-125 transition"></div>
+                    <div class="hidden md:block absolute -left-28 top-1 text-sm font-mono font-bold text-purple-400">2024</div>
+                    <div class="bg-bioCard border border-slate-800 p-5 rounded-xl hover:border-purple-400/40 transition">
+                        <div class="md:hidden text-xs font-mono font-bold text-purple-400 mb-1">YEAR 2024</div>
+                        <h3 class="text-lg font-bold text-white">Epigenetic Printing & Multi-Bit DNA Writing</h3>
+                        <p class="text-xs text-slate-400 font-mono mb-2">Nature Scientific Reports</p>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Introduction of epigenetic methyl-mark modification on natural DNA backbones, bypassing expensive step-by-step de novo synthesis and lowering write costs.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2025 Milestone -->
+                <div class="relative pl-6 md:pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-bioBg border-2 border-cyanAccent group-hover:scale-125 transition"></div>
+                    <div class="hidden md:block absolute -left-28 top-1 text-sm font-mono font-bold text-cyanAccent">2025</div>
+                    <div class="bg-bioCard border border-slate-800 p-5 rounded-xl hover:border-cyanAccent/40 transition glow-cyan">
+                        <div class="md:hidden text-xs font-mono font-bold text-cyanAccent mb-1">YEAR 2025</div>
+                        <h3 class="text-lg font-bold text-white">CRISPR-Cas9 Precise Random Access Breakthrough</h3>
+                        <p class="text-xs text-slate-400 font-mono mb-2">Advanced Molecular Computing Labs</p>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Development of targeted CRISPR RNA-guided search mechanisms allowing instant random-access querying of specific digital files within massive multi-exabyte DNA pools without sequencing the entire pool.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 5: INTERACTIVE SYSTEMS COMPARISON MATRIX -->
+        <section id="matrix" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
+                <div>
+                    <div class="text-emeraldAccent font-mono text-xs uppercase tracking-widest">Comparative Evaluation</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="layers" class="text-emeraldAccent"></i> Storage Media Comparison Matrix
+                    </h2>
+                </div>
+                <div class="flex space-x-2 text-xs font-mono">
+                    <button onclick="filterMatrix('all')" class="px-3 py-1.5 rounded bg-slate-800 text-slate-200 hover:bg-cyanAccent hover:text-bioBg transition">All Criteria</button>
+                    <button onclick="filterMatrix('performance')" class="px-3 py-1.5 rounded bg-slate-800 text-slate-200 hover:bg-cyanAccent hover:text-bioBg transition">Performance & Speed</button>
+                    <button onclick="filterMatrix('eco')" class="px-3 py-1.5 rounded bg-slate-800 text-slate-200 hover:bg-cyanAccent hover:text-bioBg transition">Eco & Energy</button>
+                </div>
+            </div>
+
+            <!-- Comparison Table Container -->
+            <div class="overflow-x-auto rounded-xl border border-slate-800 bg-bioCard">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-bioBg text-xs uppercase font-mono text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th scope="col" class="p-4">Feature / Parameter</th>
+                            <th scope="col" class="p-4 text-cyanAccent">Traditional HDD / SSD</th>
+                            <th scope="col" class="p-4 text-purple-400">Protein / Peptide Storage</th>
+                            <th scope="col" class="p-4 text-emeraldAccent bg-emerald-950/20 border-l border-r border-emerald-500/20">Synthetic DNA Storage</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/80 font-mono text-xs">
+                        
+                        <tr class="matrix-row" data-cat="all performance">
+                            <td class="p-4 font-bold text-white">Data Density</td>
+                            <td class="p-4">~10<sup>13</sup> bytes/m<sup>3</sup></td>
+                            <td class="p-4">~10<sup>15</sup> bytes/m<sup>3</sup></td>
+                            <td class="p-4 text-emeraldAccent font-bold bg-emerald-950/10 border-l border-r border-emerald-500/20">~10<sup>19</sup> bytes/m<sup>3</sup> (215 PB/g)</td>
+                        </tr>
+
+                        <tr class="matrix-row" data-cat="all eco">
+                            <td class="p-4 font-bold text-white">Durability / Shelf Life</td>
+                            <td class="p-4 text-red-400">3 - 10 Years (Rot/Degradation)</td>
+                            <td class="p-4">5 - 20 Years</td>
+                            <td class="p-4 text-emeraldAccent font-bold bg-emerald-950/10 border-l border-r border-emerald-500/20">100 to 1,000+ Years</td>
+                        </tr>
+
+                        <tr class="matrix-row" data-cat="all eco">
+                            <td class="p-4 font-bold text-white">Maintenance Energy</td>
+                            <td class="p-4 text-red-400">High (Continuous cooling & power)</td>
+                            <td class="p-4">Low (Refrigerated)</td>
+                            <td class="p-4 text-emeraldAccent font-bold bg-emerald-950/10 border-l border-r border-emerald-500/20">Zero (Passive cold/dry tube)</td>
+                        </tr>
+
+                        <tr class="matrix-row" data-cat="all performance">
+                            <td class="p-4 font-bold text-white">Read Latency / Speed</td>
+                            <td class="p-4 text-cyanAccent font-bold">Nanoseconds / Microseconds</td>
+                            <td class="p-4">Minutes (Mass Spectrometry)</td>
+                            <td class="p-4 text-slate-400 bg-emerald-950/10 border-l border-r border-emerald-500/20">Hours (NGS Sequencing)</td>
+                        </tr>
+
+                        <tr class="matrix-row" data-cat="all performance">
+                            <td class="p-4 font-bold text-white">Write Speed & Cost</td>
+                            <td class="p-4 text-cyanAccent font-bold">Instant / &lt;$0.01 per GB</td>
+                            <td class="p-4">Moderate cost</td>
+                            <td class="p-4 text-orange-400 bg-emerald-950/10 border-l border-r border-emerald-500/20">Slow (~$1,000s/MB current synthesis)</td>
+                        </tr>
+
+                        <tr class="matrix-row" data-cat="all eco">
+                            <td class="p-4 font-bold text-white">Environmental E-Waste</td>
+                            <td class="p-4 text-red-400">High (Heavy metals, plastics)</td>
+                            <td class="p-4 text-emeraldAccent font-bold">Biodegradable</td>
+                            <td class="p-4 text-emeraldAccent font-bold bg-emerald-950/10 border-l border-r border-emerald-500/20">Zero E-Waste (Organic Biomarkers)</td>
+                        </tr>
+
+                        <tr class="matrix-row" data-cat="all performance">
+                            <td class="p-4 font-bold text-white">Rewritability</td>
+                            <td class="p-4 text-cyanAccent font-bold">Unlimited Cycles</td>
+                            <td class="p-4">Write Once (WORM)</td>
+                            <td class="p-4 text-slate-300 bg-emerald-950/10 border-l border-r border-emerald-500/20">WORM / Enzymatic Edit (CRISPR)</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECTION 6: PROJECT CREDITS & ACADEMIC REFERENCES -->
+        <section class="bg-gradient-to-r from-bioCard to-bioBg border border-slate-800 rounded-2xl p-6 md:p-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Presenter Credits -->
+                <div class="space-y-4">
+                    <div class="text-cyanAccent font-mono text-xs uppercase tracking-widest">Academic Presentation Project</div>
+                    <h3 class="text-xl font-bold text-white">Project Authors & Presenters</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div class="bg-bioBg p-4 rounded-xl border border-slate-800 flex items-center space-x-3">
+                            <div class="p-2.5 rounded-full bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/30 font-bold">
+                                BJ
+                            </div>
+                            <div>
+                                <div class="font-bold text-white text-sm">Bryan John</div>
+                                <div class="text-xs font-mono text-cyanAccent">Roll No: D289</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-bioBg p-4 rounded-xl border border-slate-800 flex items-center space-x-3">
+                            <div class="p-2.5 rounded-full bg-emeraldAccent/10 text-emeraldAccent border border-emeraldAccent/30 font-bold">
+                                KK
+                            </div>
+                            <div>
+                                <div class="font-bold text-white text-sm">Krishna Kulkarni</div>
+                                <div class="text-xs font-mono text-emeraldAccent">Roll No: D287</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Academic References -->
+                <div class="space-y-3 font-mono text-xs text-slate-400">
+                    <div class="text-emeraldAccent font-mono text-xs uppercase tracking-widest">Key Research Papers</div>
+                    <ul class="space-y-2">
+                        <li class="bg-bioBg/60 p-2.5 rounded border border-slate-800/80">
+                            1. Church, G. M., Gao, Y., & Kosuri, S. (2012). <em>Next-generation digital information storage in DNA</em>. Science, 337(6102), 1628.
+                        </li>
+                        <li class="bg-bioBg/60 p-2.5 rounded border border-slate-800/80">
+                            2. Erlich, Y., & Zielinski, D. (2017). <em>DNA Fountain enables high-density DNA storage</em>. Science, 355(6328), 950-954.
+                        </li>
+                        <li class="bg-bioBg/60 p-2.5 rounded border border-slate-800/80">
+                            3. Takahashi, C. N., et al. (2019). <em>Demonstration of end-to-end automated DNA data storage</em>. Scientific Reports.
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-bioNav py-6 text-center text-xs font-mono text-slate-500">
+        <p>Nature-Inspired Data Storage Systems &bull; Bryan John (D289) & Krishna Kulkarni (D287)</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // 2-Bit Binary Mapping Rule
+        const BIN_TO_DNA = { '00': 'A', '01': 'T', '10': 'C', '11': 'G' };
+        const DNA_TO_BIN = { 'A': '00', 'T': '01', 'C': '10', 'G': '11' };
+
+        let currentMode = 'encode'; // 'encode' or 'decode'
+
+        // Smooth Scroll Helper
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Toggle Mobile Menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+
+        // Switch Modes between Encode and Decode
+        function setAppMode(mode) {
+            currentMode = mode;
+            const encodeGroup = document.getElementById('encodeInputGroup');
+            const decodeGroup = document.getElementById('decodeInputGroup');
+            const modeEncodeBtn = document.getElementById('modeEncodeBtn');
+            const modeDecodeBtn = document.getElementById('modeDecodeBtn');
+            const convertBtnText = document.getElementById('convertBtnText');
+            const outputBoxLabel = document.getElementById('outputBoxLabel');
+
+            if (mode === 'encode') {
+                encodeGroup.classList.remove('hidden');
+                decodeGroup.classList.add('hidden');
+                modeEncodeBtn.className = "flex-1 py-2 rounded-md font-bold text-bioBg bg-cyanAccent transition";
+                modeDecodeBtn.className = "flex-1 py-2 rounded-md font-bold text-slate-400 hover:text-white transition";
+                convertBtnText.innerText = "Synthesize DNA Strand";
+                outputBoxLabel.innerText = "Synthesized DNA Sequence:";
+            } else {
+                encodeGroup.classList.add('hidden');
+                decodeGroup.classList.remove('hidden');
+                modeEncodeBtn.className = "flex-1 py-2 rounded-md font-bold text-slate-400 hover:text-white transition";
+                modeDecodeBtn.className = "flex-1 py-2 rounded-md font-bold text-bioBg bg-cyanAccent transition";
+                convertBtnText.innerText = "Decode DNA to Text";
+                outputBoxLabel.innerText = "Decoded Original Text:";
+            }
+            processConverter();
+        }
+
+        // File Upload Handler
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            document.getElementById('fileNameDisplay').innerText = file.name + ` (${file.size} bytes)`;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('textInput').value = e.target.result;
+                setAppMode('encode');
+                processConverter();
+            };
+            reader.readAsText(file);
+        }
+
+        // Mutation Slider Label Update
+        function updateMutationRateLabel() {
+            const val = document.getElementById('mutationRate').value;
+            document.getElementById('mutationRateVal').innerText = val + '%';
+        }
+
+        // Mutation Toggle State
+        document.getElementById('mutationToggle').addEventListener('change', function() {
+            const container = document.getElementById('mutationRateContainer');
+            const legend = document.getElementById('mutationLegend');
+            if (this.checked) {
+                container.classList.remove('opacity-50', 'pointer-events-none');
+                legend.classList.remove('hidden');
+            } else {
+                container.classList.add('opacity-50', 'pointer-events-none');
+                legend.classList.add('hidden');
+            }
+        });
+
+        // Main Encoder / Decoder Logic
+        function processConverter() {
+            const isMutationActive = document.getElementById('mutationToggle').checked;
+            const mutationRate = parseInt(document.getElementById('mutationRate').value) / 100;
+
+            if (currentMode === 'encode') {
+                const text = document.getElementById('textInput').value || '';
+                document.getElementById('charCount').innerText = `${text.length} characters`;
+
+                // Convert text to binary string
+                let binaryStr = '';
+                for (let i = 0; i < text.length; i++) {
+                    let bin = text.charCodeAt(i).toString(2).padStart(8, '0');
+                    binaryStr += bin;
+                }
+
+                // Map 2-bit chunks to DNA bases
+                let dnaSequence = [];
+                for (let i = 0; i < binaryStr.length; i += 2) {
+                    let tuple = binaryStr.substr(i, 2);
+                    if (tuple.length === 2) {
+                        let base = BIN_TO_DNA[tuple] || 'A';
+                        let isMutated = false;
+
+                        // Error simulation
+                        if (isMutationActive && Math.random() < mutationRate) {
+                            const bases = ['A', 'T', 'C', 'G'];
+                            const otherBases = bases.filter(b => b !== base);
+                            base = otherBases[Math.floor(Math.random() * otherBases.length)];
+                            isMutated = true;
+                        }
+
+                        dnaSequence.push({ base: base, mutated: isMutated });
+                    }
+                }
+
+                // Render Results
+                document.getElementById('binaryOutput').innerText = binaryStr || '00000000';
+                
+                const finalDnaStr = dnaSequence.map(item => item.base).join('');
+                document.getElementById('finalOutput').innerText = finalDnaStr || '-';
+                
+                renderVisualStrand(dnaSequence);
+                updateStats(dnaSequence.length, binaryStr.length, finalDnaStr);
+
+            } else {
+                // DECODE MODE
+                const rawDna = (document.getElementById('dnaInput').value || '').toUpperCase().replace(/[^ATCG]/g, '');
+                
+                let binaryStr = '';
+                let dnaSequence = [];
+
+                for (let i = 0; i < rawDna.length; i++) {
+                    let base = rawDna[i];
+                    let isMutated = false;
+
+                    if (isMutationActive && Math.random() < mutationRate) {
+                        const bases = ['A', 'T', 'C', 'G'];
+                        const otherBases = bases.filter(b => b !== base);
+                        base = otherBases[Math.floor(Math.random() * otherBases.length)];
+                        isMutated = true;
+                    }
+
+                    dnaSequence.push({ base: base, mutated: isMutated });
+                    binaryStr += DNA_TO_BIN[base] || '00';
+                }
+
+                // Convert binary to text bytes
+                let decodedText = '';
+                for (let i = 0; i < binaryStr.length; i += 8) {
+                    let byteStr = binaryStr.substr(i, 8);
+                    if (byteStr.length === 8) {
+                        decodedText += String.fromCharCode(parseInt(byteStr, 2));
+                    }
+                }
+
+                document.getElementById('binaryOutput').innerText = binaryStr || '00000000';
+                document.getElementById('finalOutput').innerText = decodedText || '[Invalid or Empty DNA Sequence]';
+
+                renderVisualStrand(dnaSequence);
+                updateStats(dnaSequence.length, binaryStr.length, rawDna);
+            }
+        }
+
+        // Render Visual Base Nodes in Strand Box
+        function renderVisualStrand(dnaSequence) {
+            const container = document.getElementById('dnaStrandContainer');
+            document.getElementById('visualCountLabel').innerText = `${dnaSequence.length} Bases`;
+            
+            if (dnaSequence.length === 0) {
+                container.innerHTML = `<span class="text-slate-500 font-mono text-xs">No DNA sequence generated yet...</span>`;
+                return;
+            }
+
+            // Cap visible node rendering to first 120 bases for performance
+            const maxVisible = 120;
+            let html = '';
+
+            dnaSequence.slice(0, maxVisible).forEach((item, index) => {
+                let colorClass = 'bg-baseA text-bioBg';
+                if (item.base === 'T') colorClass = 'bg-baseT text-white';
+                if (item.base === 'C') colorClass = 'bg-baseC text-bioBg';
+                if (item.base === 'G') colorClass = 'bg-baseG text-white';
+
+                let borderClass = item.mutated ? 'ring-2 ring-red-500 ring-offset-1 ring-offset-bioBg animate-pulse' : '';
+
+                html += `<div title="Base #${index+1}: ${item.base} ${item.mutated ? '(MUTATED ERROR)' : ''}" class="dna-base-node px-2 py-1 rounded text-xs font-mono font-bold ${colorClass} ${borderClass} select-none cursor-pointer">
+                            ${item.base}
+                         </div>`;
+            });
+
+            if (dnaSequence.length > maxVisible) {
+                html += `<div class="px-2 py-1 text-xs font-mono text-slate-400 font-bold">+${dnaSequence.length - maxVisible} more bases...</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Update Statistics
+        function updateStats(baseCount, bitsCount, dnaStr) {
+            document.getElementById('statBaseCount').innerText = baseCount.toLocaleString();
+            document.getElementById('statBitsCount').innerText = `${bitsCount.toLocaleString()} bits`;
+
+            if (baseCount === 0) {
+                document.getElementById('statGcRatio').innerText = '0%';
+                return;
+            }
+
+            const gcMatches = (dnaStr.match(/[GC]/g) || []).length;
+            const ratio = ((gcMatches / baseCount) * 100).toFixed(1);
+            document.getElementById('statGcRatio').innerText = `${ratio}%`;
+        }
+
+        // Real-time Text Area Listener
+        document.getElementById('textInput').addEventListener('input', processConverter);
+        document.getElementById('dnaInput').addEventListener('input', processConverter);
+
+        // Copy Helper
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            if (!text || text === '-') return;
+            
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            alert('Copied output to clipboard!');
+        }
+
+        // DENSITY & STORAGE CALCULATOR
+        function calculateDensity() {
+            const size = parseFloat(document.getElementById('dataSizeInput').value) || 0;
+            const unit = document.getElementById('dataUnitSelect').value;
+
+            // Convert everything to Petabytes (PB)
+            let sizeInPB = 0;
+            switch(unit) {
+                case 'GB': sizeInPB = size / 1000000; break;
+                case 'TB': sizeInPB = size / 1000; break;
+                case 'PB': sizeInPB = size; break;
+                case 'EB': sizeInPB = size * 1000; break;
+                case 'ZB': sizeInPB = size * 1000000; break;
+            }
+
+            // Benchmark: 1 Gram DNA = 215 PB
+            const weightInGrams = sizeInPB / 215;
+
+            // Format DNA Weight
+            let weightStr = '';
+            let weightAnalogy = '';
+
+            if (weightInGrams < 0.000001) {
+                weightStr = (weightInGrams * 1000000000).toFixed(2) + ' nanograms';
+                weightAnalogy = 'Microscopic amount — invisible to the human eye.';
+            } else if (weightInGrams < 0.001) {
+                weightStr = (weightInGrams * 1000000).toFixed(3) + ' micrograms (µg)';
+                weightAnalogy = 'Lighter than a tiny speck of dust.';
+            } else if (weightInGrams < 1) {
+                weightStr = (weightInGrams * 1000).toFixed(3) + ' milligrams (mg)';
+                weightAnalogy = 'Smaller than a single grain of table salt.';
+            } else if (weightInGrams < 1000) {
+                weightStr = weightInGrams.toFixed(2) + ' grams (g)';
+                weightAnalogy = `Equivalent weight to about ${(weightInGrams / 5).toFixed(1)} paperclips.`;
+            } else {
+                weightStr = (weightInGrams / 1000).toFixed(2) + ' kilograms (kg)';
+                weightAnalogy = `Fits effortlessly inside a single handheld beaker.`;
+            }
+
+            document.getElementById('calcDnaWeight').innerText = weightStr;
+            document.getElementById('calcWeightAnalogy').innerText = weightAnalogy;
+
+            // HDD Comparison (10 TB hard drives, weighing ~700g each)
+            let sizeInTB = sizeInPB * 1000;
+            let hddCount = Math.ceil(sizeInTB / 10);
+            let hddWeightKg = (hddCount * 0.7).toFixed(1);
+
+            document.getElementById('calcHddCount').innerText = `${hddCount.toLocaleString()} Drives`;
+            document.getElementById('calcHddWeight').innerText = `Requires ~${hddWeightKg.toLocaleString()} kg of physical hard drive hardware.`;
+
+            // Visual Footprint Analogy Box
+            let analogyText = '';
+            if (sizeInPB < 1) {
+                analogyText = `Storing this <strong>${size} ${unit}</strong> dataset in DNA takes up less than a single droplet of liquid, whereas traditional hard disk drives would require a stack of <strong>${hddCount} enterprise drives</strong>.`;
+            } else if (sizeInPB < 1000) {
+                analogyText = `Storing <strong>${size} ${unit}</strong> in synthetic DNA requires less than <strong>${weightStr}</strong> of material inside a small test tube. In contrast, standard storage hardware would require <strong>${hddCount.toLocaleString()} hard drives</strong> spanning multiple server racks in a datacenter!`;
+            } else {
+                analogyText = `Storing <strong>${size} ${unit}</strong> (Global Scale Data) in synthetic DNA weighs roughly <strong>${weightStr}</strong> (fits inside a single shoebox). To store this traditionally would require <strong>${hddCount.toLocaleString()} hard drives</strong>, consuming entire warehouse-sized datacenters with tens of Megawatts of cooling power!`;
+            }
+
+            document.getElementById('calcAnalogyBox').innerHTML = analogyText;
+        }
+
+        function setPreset(size, unit) {
+            document.getElementById('dataSizeInput').value = size;
+            document.getElementById('dataUnitSelect').value = unit;
+            calculateDensity();
+        }
+
+        // MATRIX FILTER
+        function filterMatrix(category) {
+            const rows = document.querySelectorAll('.matrix-row');
+            rows.forEach(row => {
+                const cats = row.getAttribute('data-cat');
+                if (category === 'all' || cats.includes(category)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize App on Load
+        window.onload = function() {
+            processConverter();
+            calculateDensity();
+        };
+    </script>
+</body>
+</html>
